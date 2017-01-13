@@ -12,17 +12,17 @@ var express = require('express'),
   LocalStrategy = require('passport-local').Strategy;
 
 // given to use by yelp, required to use yelp api
-var clientId = 'eOjaSriPI77z1AOBq0X33w'
-var clientSecret = 'UVTHGQC49f1hs4if3832UXZVqBr7Q4OrQxvcXVxLNxxNKk70TPr299T7rgtaS985'
+var clientId = 'eOjaSriPI77z1AOBq0X33w';
+var clientSecret = 'UVTHGQC49f1hs4if3832UXZVqBr7Q4OrQxvcXVxLNxxNKk70TPr299T7rgtaS985';
 
 // creates an unmodifiable variable
 // yelp fusion is the plugin that makes the yelp api work
-const yelp = require('yelp-fusion');
+const yelp = require('yelp-fusion');        // ES6 (ok, just be aware)
 
 app.use(bodyParser.urlencoded({
   extended : true
 }));
-// app.use(cookieParser());  ///May no longer be needed
+// app.use(cookieParser());  ///May no longer be needed   // old unused code
 app.use(session({
   secret: 'supersecretkey',
   resave: false,
@@ -38,32 +38,33 @@ passport.serializeUser(db.User.serializeUser());
 passport.deserializeUser(db.User.deserializeUser());
 
 ////////////////////
-////Load landing page
+////Load landing page   // this comment does not reflect the 3 different routes below it
+                        // perhaps "HTML Routes"?
 ////////////////////
 
 app.get('/', function(req, res){
-  console.log(__dirname);
+  console.log(__dirname);             // remove extra debugging console logs like these
   res.sendFile('views/index.html', {
     root : __dirname
   });
 });
 
 app.get('/create', function(req, res){
-  console.log(__dirname);
+  console.log(__dirname);             // remove extra debugging console logs like these
   res.sendFile('views/create.html', {
     root : __dirname
   });
 });
 
 app.get('/edit', function(req, res){
-  console.log(__dirname);
+  console.log(__dirname);             // remove extra debugging console logs like these
   res.sendFile('views/edit.html', {
     root : __dirname
   });
 });
 
 ////////////////////
-////Routes
+////Routes                  // if "HTML Routes" above, these are "API" or "JSON" routes
 ////////////////////
 
 ////Get all reviews
@@ -72,7 +73,7 @@ app.get('/api/reviews', function(req, res){
     if(err){
       console.log('Error in server.js', err);
     }
-    // console.log('all reviews are ', review);
+    // console.log('all reviews are ', review);                   // remove commented-out code blocks
     // review.forEach(function(rev){
     //   db.User.findOne({_id:rev.users}, function(err, user){
     //     rev.username = user.username
@@ -82,12 +83,14 @@ app.get('/api/reviews', function(req, res){
   });
 });
 
-//Get one review  this may work for seeded data
+//Get one review  this may work for seeded data           // why only seed data?
 app.get('/api/reviews/:id', function(req, res) {
   var reviewId = req.params.id;
   db.Review.findOne({ _id: reviewId }, function(err, review){
     if(err){
       console.log('FindOne error in server.js', err);
+      // In this and all similar circumstances, send an error response if there are...
+      // ... errors so that your front end doesn't get a "success" response without actual data
     }
     console.log('your single review is ', review);
     res.send(review);
@@ -162,7 +165,7 @@ app.post('/api/reviews', function (req, res) {
       //save the changes
       newReview.save()
     });
-    newReview.users.push(req.user);
+    newReview.users.push(req.user);    // why more than one user being stored for a review?
     newReview.save()
     // console.log(req.user);
     req.user.reviews.push(review);
@@ -172,7 +175,7 @@ app.post('/api/reviews', function (req, res) {
 });
 
 // delete review
-app.delete('/api/reviews/:id', function (req, res) {
+app.delete('/api/reviews/:id', function (req, res) {            // are there UI elements that allow delete?
   console.log('review delete', req.params);
   var reviewId = req.params.id;
   db.Review.findOneAndRemove({ _id: reviewId }, function (err, deletedReview) {
@@ -181,7 +184,7 @@ app.delete('/api/reviews/:id', function (req, res) {
 });
 
 // edit one review
-app.put('/api/reviews/:id', function (req, res){
+app.put('/api/reviews/:id', function (req, res){           // are there UI elements that allow edit?
   var reviewId = req.params.id;
   db.Review.findOne({ _id: reviewId }, function(err, foundReview){
     if(err){
@@ -205,7 +208,9 @@ app.put('/api/reviews/:id', function (req, res){
 
 //Get closest sandwich locations from yelp api
 app.post('/api/locations/', function(req, res){
-  yelp.accessToken(clientId, clientSecret).then(response => {
+  // Inconsistent to use the => syntax (below) when most of your code has written out functions.
+  // Why did you make this choice?
+  yelp.accessToken(clientId, clientSecret).then(response => {  // ES6 (ok, just be aware)
     // sets the variable client as a constant
     const client = yelp.client(response.jsonBody.access_token);
     client.search({
@@ -215,14 +220,14 @@ app.post('/api/locations/', function(req, res){
       latitude: req.body.location.lat,
       longitude: req.body.location.lng,
       radius: 800
-    }).then(response => {
+    }).then(response => {                       
       // these are the businesses returned by yelp
-      res.json(response.jsonBody.businesses)
+      res.json(response.jsonBody.businesses);
     });
   }).catch(e => {
     console.log(e);
   });
-})
+});
 
 ////////////////////
 ////Login Routes
@@ -233,7 +238,8 @@ app.post('/signup', function (req, res) {
   db.User.register(new db.User({ username: req.body.username }), req.body.password,
     function (err, newUser) {
       passport.authenticate('local')(req, res, function() {
-        // res.send('signed up!!!');
+        // res.send('signed up!!!');        // old unused code
+        // consider logging the user in 
         res.redirect('/');
       });
     }
@@ -242,7 +248,7 @@ app.post('/signup', function (req, res) {
 
 //User login route
 app.post('/login', passport.authenticate('local'), function (req, res) {
-  // res.send('logged in!!! Session ID : '+req.sessionID + "User name : "+ req.user.username);
+  // res.send('logged in!!! Session ID : '+req.sessionID + "User name : "+ req.user.username);   // old unused code
   res.redirect('/');
 });
 
@@ -254,8 +260,8 @@ app.get('/logout', function (req, res) {
 
 //Get active user data
 app.get('/api/user/active', function (req, res){
-  res.json(req.user)
-})
+  res.json(req.user);
+});
 
 ////////////////////
 ////Listen
@@ -263,6 +269,5 @@ app.get('/api/user/active', function (req, res){
 
 
 app.listen(process.env.PORT || 3000, function(){
-
   console.log('express server online on port', 3000)
 });
