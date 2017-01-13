@@ -1,4 +1,10 @@
-console.log('sanity check, app.js is connected')
+// This file is *VERY* long!
+// Consider breaking giant client-side JS files into smaller ones that each have a certain job. 
+// They can then be linked in the HTML in the order they need to load.
+// It's not always straightforward, but it would make this file more managable.
+
+
+console.log('sanity check, app.js is connected');
 
 //Declare global variables here
 var map,
@@ -35,21 +41,21 @@ var map,
       'Lettuce celebrate!'
     ];
 
-if(!activeUser){
+if(!activeUser){        // why are you doing this when the page first loads?   activeUser isn't defined yet?
   var activeUser = {}
 }
 
 var giphyApi = "https://api.giphy.com/v1/gifs/search";
 
-if(!(activeUser.reviews)){
-  activeUser.reviews = []
+if(!(activeUser.reviews)){          // same, activeUser not defined when the page first loads
+  activeUser.reviews = [];
 }
 
 
 // these things only happen once the document is ready
 $(document).ready(function(){
   console.log('The DOM body is ready')
-  console.log('Body parser parsing that body!');
+  console.log('Body parser parsing that body!');     // body-parser is server side only.
   $('.batwich-chat').hide();
   $('.hero-chat').hide();
 
@@ -57,6 +63,7 @@ $(document).ready(function(){
 //*****************
 //*****************
 
+   // You might have been able to find more semantic names than sourceOne, sourceTwo, sourceThree
   //Gif Handlebars templates
   var sourceOne = $('#selectableGif-template2').html(),
     templateGif = Handlebars.compile(sourceOne),
@@ -68,8 +75,9 @@ $(document).ready(function(){
     sourceTwo = $("#review-template").html(),
     templateReview = Handlebars.compile(sourceTwo);
 
+    
     //Restaurant Handlebars templates
-    sourceRestaurant = $('#restaurant-template').html(),
+    sourceRestaurant = $('#restaurant-template').html(), // this line is missing 'var', so the next 4 are global variables.
     templateRestaurant = Handlebars.compile(sourceRestaurant),
 
     sourceTwoButtons = $('#review-template-buttons').html(),
@@ -77,7 +85,7 @@ $(document).ready(function(){
 
   // this is what submits the form to add a review in
   $('.new-review').on('submit', function(event) {
-    console.log('submit clicked');
+    console.log('submit clicked');  // remove debugging console.logs if cleaning up for portfolio
     event.preventDefault();
 
     $.ajax({
@@ -160,15 +168,16 @@ $(document).ready(function(){
     createMap(defaultLocation);
   })
 
+    // why is this function indented?
     // creates a google map using location info
     function createMap(data){
       console.log('location found - lat: ', data.location.lat, 'lng: ', data.location.lng);
       $('.change-location').hide();
       if (document.getElementById('mapPlacement')){
         map = new google.maps.Map(document.getElementById('mapPlacement'), {
-        center: {lat: data.location.lat, lng: data.location.lng},
-        zoom: 15
-        })
+          center: {lat: data.location.lat, lng: data.location.lng},
+          zoom: 15
+        });
         $.ajax({
           method: 'POST',
           url: '/api/locations',
@@ -190,7 +199,7 @@ $(document).ready(function(){
     }
 
     function noLocation(data){
-      console.log('could not find location ', data)
+      console.log('could not find location ', data);
     }
 
     // looks at each restaraunt sent from yelp
@@ -200,10 +209,10 @@ $(document).ready(function(){
         var location = {
           lat: restaurant.coordinates.latitude,
           lng: restaurant.coordinates.longitude
-        }
+        };
         // this is the content that goes on the card associated with each restaurant in the map
-        var content = '<h6>' + restaurant.name + '</h6>' + '<p>' + restaurant.location.address1 + '</p>'
-        addMarker(location, content)
+        var content = '<h6>' + restaurant.name + '</h6>' + '<p>' + restaurant.location.address1 + '</p>';
+        addMarker(location, content);
       })
     }
 
@@ -231,6 +240,8 @@ $(document).ready(function(){
       console.log('you found no restaurants :(  NO SOUP FOR YOU ... wait ... sandwich ... NO SANDWICH FOR YOU!!', data);
     }
 
+    // did you look into map events for this?
+    // https://developers.google.com/maps/documentation/javascript/events#MarkerEvents
     //Detects clicking and dragging on the map, shows the button to search
     $('.hero-map').mousedown(function(){
       if ($('.hero-map').mousemove(function(){
@@ -243,7 +254,7 @@ $(document).ready(function(){
     $('.current-location').on('click', '#current-location', findLocation)
 
     function findLocation (){
-      console.log('I know where you live!')
+      console.log('I know where you live!');
       $.ajax({
         method: 'POST',
         url: 'https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyDN9w5iCC44NN-_bnoO7Yu8ZXnmHB_QmJg',
@@ -261,7 +272,6 @@ $(document).ready(function(){
           lng: map.getCenter().lng()
         }
       }
-
       createMap(movedMapLocation);
     })
 
@@ -316,19 +326,19 @@ $(document).ready(function(){
         reviewGif: reviewData.gif,
         reviewId: reviewData._id,
         author: reviewData.username
-        };
-        console.log(reviewData.username)
+        };                                                         // indentation is off
+        console.log(reviewData.username);
         if (activeUser.reviews.indexOf(reviewData._id)>=0){
-          reviewHtml = templateReviewButtons(reviewInfo)
+          reviewHtml = templateReviewButtons(reviewInfo);
         } else {
-          reviewHtml = templateReview(reviewInfo)
+          reviewHtml = templateReview(reviewInfo);
         }
         if(activeUser._id){
-          $('.login').hide()
-          $('.sign-up').hide()
+          $('.login').hide();
+          $('.sign-up').hide();
         } else {
-          $('.create').hide()
-          $('.logout').hide()
+          $('.create').hide();
+          $('.logout').hide();
         }
       // add review to top of review area
       $('.appendReviews').prepend(reviewHtml);
@@ -383,7 +393,7 @@ $(document).ready(function(){
     })
     console.log('The review was edited', data);
     return templateReview;
-    window.location.href="../"
+    window.location.href="../";
   }
 
   function heroChat() {
@@ -419,7 +429,7 @@ function newReviewError(error){
 }
 
 function yelpSuccess(restaurant){
-  console.log(restaurant)
+  console.log(restaurant);
 }
 
 function yelpError (error){
@@ -427,11 +437,11 @@ function yelpError (error){
 }
 
 function yelpCallback (data){
-  console.log('this is the yelp callback', data)
+  console.log('this is the yelp callback', data);
 }
 
 function noAppend (err){
-  console.log('the reviews did not append', err)
+  console.log('the reviews did not append', err);
 }
 
 function newGifSearchError(error){
@@ -451,6 +461,6 @@ function editFailure(error){
 }
 
 function saveUser(user){
-  console.log(user)
-  activeUser = user
+  console.log(user);
+  activeUser = user;
 }
